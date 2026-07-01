@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "_card.html" import product_card %}
+{% block title %}{{ cat_name }} - ShopSmart{% endblock %}
+
+{% block content %}
+<div class="hero-section py-4">
+  <div class="container">
+    <nav class="small text-muted mb-2">
+      <a href="{{ url_for('home') }}" class="text-muted text-decoration-none">Home</a>
+      <i class="bi bi-chevron-right mx-1" style="font-size:.7rem"></i>
+      <a href="{{ url_for('categories') }}" class="text-muted text-decoration-none">Categories</a>
+      {% if active_cat != 'all' %}
+      <i class="bi bi-chevron-right mx-1" style="font-size:.7rem"></i>
+      <span class="text-primary">{{ cat_name }}</span>
+      {% endif %}
+    </nav>
+    <h2 class="fw-bold mb-1 reveal">{{ cat_name }}</h2>
+    <p class="text-muted mb-0 reveal">Handpicked products from Amazon at the best prices.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- SIDEBAR -->
+    <div class="col-lg-3 reveal-left">
+      <div class="filter-box p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-funnel me-2"></i>Categories</h6>
+        <a href="{{ url_for('categories') }}"
+           class="filter-link {% if active_cat=='all' %}active{% endif %}">
+          All Products
+        </a>
+        {% for cat in categories %}
+        <a href="{{ url_for('categories', cat_key=cat.key) }}"
+           class="filter-link {% if active_cat==cat.key %}active{% endif %}">
+          <i class="bi {{ cat.icon }} me-2"></i>{{ cat.name }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- GRID -->
+    <div class="col-lg-9">
+      <p class="text-muted mb-3 reveal">Showing <strong>{{ products|length }}</strong> product(s)</p>
+      <div class="row g-3">
+        {% for p in products %}
+          {{ product_card(p) }}
+        {% else %}
+        <div class="col-12 text-center text-muted py-5">
+          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+          No products found in this category.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

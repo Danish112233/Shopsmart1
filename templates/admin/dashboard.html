@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Admin Dashboard - ShopSmart</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body{background:#f8f7ff}
+    .sidebar{background:#1e1b4b;min-height:100vh;width:240px;position:fixed;top:0;left:0;padding:1.5rem 1rem;z-index:100}
+    .brand{color:#fff;font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:.6rem;margin-bottom:2rem}
+    .brand-icon{background:#6c63ff;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+    .slink{display:block;color:rgba(255,255,255,.7);text-decoration:none;padding:.6rem 1rem;border-radius:10px;margin-bottom:.3rem;font-size:.9rem;transition:all .2s}
+    .slink:hover,.slink.active{background:#6c63ff;color:#fff}
+    .main{margin-left:240px;padding:2rem}
+    .topbar{background:#fff;border-radius:16px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+    .stat-card{background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,.05);text-align:center}
+    .section-card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.05);overflow:hidden;margin-bottom:2rem}
+    .section-card-header{padding:1rem 1.5rem;border-bottom:1px solid #f0efff;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+    .btn-primary{background:#6c63ff;border-color:#6c63ff}
+    .btn-primary:hover{background:#5a52e0;border-color:#5a52e0}
+    .pimg{width:50px;height:50px;object-fit:contain;border-radius:8px;background:#f0efff;padding:4px}
+    .sub-email{font-size:.88rem;font-weight:500}
+    .sub-date{font-size:.75rem;color:#aaa}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:1rem}}
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand-icon"><i class="bi bi-bag-fill text-white"></i></div>
+    ShopSmart
+  </div>
+  <a href="{{ url_for('admin_dashboard') }}" class="slink active"><i class="bi bi-grid me-2"></i>Dashboard</a>
+  <a href="{{ url_for('admin_add') }}" class="slink"><i class="bi bi-plus-circle me-2"></i>Add Product</a>
+  <a href="#clicks-section" class="slink"><i class="bi bi-mouse2 me-2"></i>Affiliate Clicks</a>
+  <a href="#social" class="slink"><i class="bi bi-share me-2"></i>Social Links</a>
+  <a href="#subscribers" class="slink"><i class="bi bi-envelope me-2"></i>Subscribers</a>
+  <a href="{{ url_for('home') }}" class="slink" target="_blank"><i class="bi bi-box-arrow-up-right me-2"></i>View Website</a>
+  <a href="{{ url_for('admin_logout') }}" class="slink mt-4" style="color:#ff6b6b"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <h5 class="mb-0 fw-bold">Admin Dashboard</h5>
+    <a href="{{ url_for('admin_add') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-circle me-1"></i> Add Product
+    </a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ 'success' if cat=='success' else ('info' if cat=='info' else 'danger') }} alert-dismissible py-2 mb-3" role="alert">
+      {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  {% endwith %}
+
+  <!-- STATS -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="fs-2 fw-bold text-primary">{{ products|length }}</div>
+        <div class="text-muted small">Total Products</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="fs-2 fw-bold text-success">{{ products|selectattr('top_pick')|list|length }}</div>
+        <div class="text-muted small">Top Picks</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="fs-2 fw-bold text-warning">{{ subscribers|length }}</div>
+        <div class="text-muted small">Subscribers</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="cursor:pointer" onclick="document.getElementById('clicks-section').scrollIntoView({behavior:'smooth'})">
+        <div class="fs-2 fw-bold" style="color:#f59e0b">{{ total_clicks }}</div>
+        <div class="text-muted small">Amazon Clicks</div>
+        <div class="small text-primary mt-1">{{ active_filter|capitalize }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLICKS SECTION -->
+  <div class="section-card mb-4" id="clicks-section">
+    <div class="section-card-header">
+      <span><i class="bi bi-mouse2 me-2"></i>Amazon Affiliate Clicks</span>
+    </div>
+    <div class="p-4">
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        {% for f, label in [('today','Today'),('yesterday','Yesterday'),('week','This Week'),('month','This Month'),('6month','6 Months'),('year','1 Year'),('all','All Time')] %}
+        <a href="?filter={{ f }}#clicks-section"
+           class="btn btn-sm {% if active_filter == f %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+          {{ label }}
+        </a>
+        {% endfor %}
+      </div>
+
+      <div class="text-center mb-4 p-4 rounded-3" style="background:#fff9f0;border:2px solid #fde68a">
+        <div style="font-size:3rem;font-weight:900;color:#f59e0b">{{ total_clicks }}</div>
+        <div class="text-muted fw-semibold">Total Amazon Clicks
+          {% if active_filter != 'all' %}({{ active_filter|capitalize }}){% endif %}
+        </div>
+      </div>
+
+      {% if top_clicked %}
+      <h6 class="fw-bold mb-3">Top Clicked Products</h6>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Product Name</th>
+              <th class="text-center">Clicks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in top_clicked %}
+            <tr>
+              <td class="text-muted small">{{ loop.index }}</td>
+              <td class="fw-semibold small">{{ row['product_name'] }}</td>
+              <td class="text-center">
+                <span class="badge fs-6" style="background:#f59e0b;color:#111">{{ row['cnt'] }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center text-muted py-4">
+        <i class="bi bi-mouse2 fs-1 d-block mb-2"></i>
+        Abhi koi clicks nahi hain is period mein.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- PRODUCTS TABLE -->
+  <div class="section-card">
+    <div class="section-card-header">
+      <span><i class="bi bi-box-seam me-2"></i>All Products</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th class="text-center">Top Pick</th>
+            <th class="text-center">Deal</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <img src="{{ p['image_list'][0] if p['image_list'] else '' }}" class="pimg" alt=""
+                     onerror="this.src='https://placehold.co/50x50/eef0ff/6c63ff?text=P'">
+                <span style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.85rem;font-weight:600">{{ p['name'] }}</span>
+              </div>
+            </td>
+            <td><span class="badge bg-light text-dark border">{{ p['category'] }}</span></td>
+            <td>
+              <div class="fw-bold">${{ "%.2f"|format(p['price']) }}</div>
+              {% if p['old_price'] %}<del class="text-muted small">${{ "%.2f"|format(p['old_price']) }}</del>{% endif %}
+            </td>
+            <td><span class="badge bg-success">{{ p['discount'] or '-' }}</span></td>
+            <td class="text-center">
+              {% if p['top_pick'] %}<i class="bi bi-check-circle-fill text-success fs-5"></i>
+              {% else %}<i class="bi bi-x-circle text-muted fs-5"></i>{% endif %}
+            </td>
+            <td class="text-center">
+              {% if p['deal_of_day'] %}<i class="bi bi-check-circle-fill text-warning fs-5"></i>
+              {% else %}<i class="bi bi-x-circle text-muted fs-5"></i>{% endif %}
+            </td>
+            <td class="text-center">
+              <a href="{{ url_for('admin_edit', pid=p['id']) }}" class="btn btn-sm btn-outline-primary me-1">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <form method="POST" action="{{ url_for('admin_delete', pid=p['id']) }}" style="display:inline"
+                    onsubmit="return confirm('Delete this product?')">
+                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="text-center text-muted py-4">No products yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SOCIAL LINKS -->
+  <div class="section-card" id="social">
+    <div class="section-card-header">
+      <span><i class="bi bi-share me-2"></i>Social Links</span>
+    </div>
+    <div class="p-4">
+      <p class="text-muted small mb-3">Apne social media links update karein. Jo show nahi karna uska "Show" uncheck kar dein.</p>
+      <form method="POST" action="{{ url_for('admin_social') }}">
+        <div class="row g-3">
+          {% for s in social_settings %}
+          <div class="col-md-6">
+            <div class="p-3 rounded-3 border bg-light">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi {{ s['icon'] }} fs-5 text-primary"></i>
+                <strong>{{ s['platform'] }}</strong>
+                <div class="ms-auto form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" name="visible_{{ s['id'] }}"
+                         id="vis_{{ s['id'] }}" {% if s['visible'] %}checked{% endif %}>
+                  <label class="form-check-label small" for="vis_{{ s['id'] }}">Show</label>
+                </div>
+              </div>
+              <input type="url" name="url_{{ s['id'] }}" class="form-control form-control-sm"
+                     value="{{ s['url'] }}" placeholder="https://...">
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">
+          <i class="bi bi-check2 me-1"></i> Save Social Links
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUBSCRIBERS -->
+  <div class="section-card" id="subscribers">
+    <div class="section-card-header">
+      <span><i class="bi bi-envelope me-2"></i>Email Subscribers ({{ subscribers|length }})</span>
+      {% if subscribers %}
+      <span class="badge bg-primary">{{ subscribers|length }} total</span>
+      {% endif %}
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Email Address</th>
+            <th>Subscribed On</th>
+            <th class="text-center">Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sub in subscribers %}
+          <tr>
+            <td class="text-muted small">{{ loop.index }}</td>
+            <td><div class="sub-email"><i class="bi bi-envelope text-primary me-2"></i>{{ sub['email'] }}</div></td>
+            <td><span class="sub-date">{{ sub['created_at'] }}</span></td>
+            <td class="text-center">
+              <form method="POST" action="{{ url_for('admin_delete_subscriber', sid=sub['id']) }}"
+                    onsubmit="return confirm('Remove this subscriber?')" style="display:inline">
+                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-4">
+              <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+              Abhi koi subscriber nahi hai.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

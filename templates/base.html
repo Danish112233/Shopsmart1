@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ShopSmart - Best Deals{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  {% if meta_desc is defined and meta_desc %}
+  <meta name="description" content="{{ meta_desc }}">
+  {% endif %}
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ request.url }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-wrap">
+    {% for cat, msg in messages %}
+    <div class="flash-msg flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<!-- SUCCESS TOAST -->
+<div class="sub-toast" id="subToast" style="display:none">
+  <div class="sub-toast-icon" id="subToastIcon">🎉</div>
+  <div>
+    <div class="sub-toast-title" id="subToastTitle">You're in!</div>
+    <div class="sub-toast-msg" id="subToastMsg">Thanks for subscribing. We'll send you the best deals first!</div>
+  </div>
+  <button class="sub-toast-close" onclick="hideToast()">✕</button>
+</div>
+
+<!-- EMAIL SUBSCRIBE POPUP -->
+<div class="sub-overlay" id="subOverlay">
+  <div class="sub-popup">
+    <button class="sub-popup-close" onclick="closePopup()">✕</button>
+    <div class="sub-popup-icon">🛍️</div>
+    <h4 class="sub-popup-title">Get Exclusive Deals!</h4>
+    <p class="sub-popup-desc">Subscribe now and be the first to know about our best Amazon deals, discounts & top picks.</p>
+    <form class="sub-popup-form" onsubmit="ajaxSubscribe(event, this)">
+      <input type="email" name="email" placeholder="Enter your email address..." required>
+      <button type="submit">Subscribe Now 🎁</button>
+    </form>
+    <p class="sub-popup-note">No spam. Unsubscribe anytime.</p>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="{{ url_for('home') }}">
+      <div class="brand-icon"><i class="bi bi-bag-fill text-white"></i></div>
+      <div>ShopSmart<div class="brand-sub">By Your Affiliate</div></div>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='home' %}nav-active{% endif %}" href="{{ url_for('home') }}">Home</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='categories' %}nav-active{% endif %}" href="{{ url_for('categories') }}">Categories</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='top_deals' %}nav-active{% endif %}" href="{{ url_for('top_deals') }}">Top Deals</a></li>
+        <li class="nav-item"><a class="nav-link {% if request.endpoint=='about' %}nav-active{% endif %}" href="{{ url_for('about') }}">About Us</a></li>
+      </ul>
+      <div class="live-search-wrap" id="lsWrap">
+        <form class="d-flex" action="{{ url_for('search') }}" method="get" autocomplete="off">
+          <div class="ls-input-wrap">
+            <i class="bi bi-search ls-icon"></i>
+            <input class="ls-input" type="search" name="q" id="lsInput"
+                   placeholder="Search products..." autocomplete="off">
+          </div>
+          <button class="ls-btn" type="submit"><i class="bi bi-arrow-right"></i></button>
+        </form>
+        <div class="ls-dropdown" id="lsDrop"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+{% block content %}{% endblock %}
+
+<!-- NEWSLETTER -->
+<section class="newsletter py-5">
+  <div class="container">
+    <div class="row align-items-center gy-3">
+      <div class="col-md-6 text-white">
+        <h4 class="fw-bold mb-1">Stay Updated</h4>
+        <p class="mb-0 opacity-75">Get the latest deals, offers & product recommendations straight to your inbox.</p>
+      </div>
+      <div class="col-md-6">
+        <form class="d-flex gap-2" id="footerSubForm" onsubmit="ajaxSubscribe(event, this)">
+          <input type="email" name="email" class="form-control" placeholder="Enter your email..." required>
+          <button class="btn btn-light text-primary fw-bold px-4" type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-light py-5">
+  <div class="container">
+    <div class="row gy-4">
+      <div class="col-md-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="brand-icon-sm"><i class="bi bi-bag-fill text-white"></i></div>
+          <strong class="fs-5">ShopSmart</strong>
+        </div>
+        <p class="small text-muted mb-3">We handpick the best products on Amazon and bring them to you with exclusive deals — all through our affiliate links. Your trust is our priority.</p>
+        {% if social_links %}
+        <div class="d-flex gap-3 fs-5">
+          {% for s in social_links %}
+          <a href="{{ s.url }}" target="_blank" rel="noopener noreferrer" class="flink" title="{{ s.platform }}">
+            <i class="bi {{ s.icon }}"></i>
+          </a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-md-2 col-6">
+        <h6 class="fw-bold mb-3">Quick Links</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><a class="flink" href="{{ url_for('home') }}">Home</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('categories') }}">Categories</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('top_deals') }}">Top Deals</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('about') }}">About Us</a></li>
+        </ul>
+      </div>
+      <div class="col-md-3 col-6">
+        <h6 class="fw-bold mb-3">Categories</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><a class="flink" href="{{ url_for('categories', cat_key='electronics') }}">Electronics</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('categories', cat_key='fashion') }}">Fashion</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('categories', cat_key='home') }}">Home & Kitchen</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('categories', cat_key='beauty') }}">Beauty</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('categories', cat_key='sports') }}">Sports</a></li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h6 class="fw-bold mb-3">Help & Legal</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-2"><a class="flink" href="{{ url_for('about') }}">About Us</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('disclaimer') }}">Affiliate Disclaimer</a></li>
+          <li class="mb-2"><a class="flink" href="{{ url_for('terms') }}">Terms of Use</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="border-secondary mt-4">
+    <div class="row align-items-center">
+      <div class="col-md-6"><p class="small text-muted mb-0">© 2026 ShopSmart. All rights reserved.</p></div>
+      <div class="col-md-6 text-md-end"><p class="small text-muted mb-0">As an Amazon Associate I earn from qualifying purchases.</p></div>
+    </div>
+  </div>
+</footer>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="{{ url_for('home') }}" class="{% if request.endpoint=='home' %}active{% endif %}"><i class="bi bi-house-fill"></i>Home</a>
+  <a href="{{ url_for('categories') }}" class="{% if request.endpoint=='categories' %}active{% endif %}"><i class="bi bi-grid-fill"></i>Categories</a>
+  <a href="{{ url_for('top_deals') }}" class="{% if request.endpoint=='top_deals' %}active{% endif %}"><i class="bi bi-tags-fill"></i>Deals</a>
+  <a href="{{ url_for('search') }}" class="{% if request.endpoint=='search' %}active{% endif %}"><i class="bi bi-search"></i>Search</a>
+  <a href="{{ url_for('about') }}" class="{% if request.endpoint=='about' %}active{% endif %}"><i class="bi bi-person-fill"></i>About</a>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function trackClick(pid, name) {
+  fetch('/track-click', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: 'pid=' + encodeURIComponent(pid) + '&name=' + encodeURIComponent(name)
+  });
+}
+
+function ajaxSubscribe(e, form) {
+  e.preventDefault();
+  const email = form.querySelector('input[name="email"]').value.trim();
+  if (!email) return;
+  fetch('/subscribe', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
+    body: 'email=' + encodeURIComponent(email)
+  })
+  .then(r => r.json())
+  .then(data => {
+    closePopup();
+    form.reset();
+    if (data.status === 'success') {
+      showToast('🎉', "You're in!", "Thanks for subscribing! Best deals coming your way.");
+    } else if (data.status === 'already') {
+      showToast('ℹ️', "Already subscribed!", "This email is already on our list.");
+    } else {
+      showToast('❌', "Oops!", "Please enter a valid email address.");
+    }
+  })
+  .catch(() => showToast('❌', "Error!", "Something went wrong. Please try again."));
+}
+
+function showToast(icon, title, msg) {
+  const toast = document.getElementById('subToast');
+  if (!toast) return;
+  document.getElementById('subToastIcon').textContent = icon;
+  document.getElementById('subToastTitle').textContent = title;
+  document.getElementById('subToastMsg').textContent = msg;
+  toast.style.display = 'flex';
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => hideToast(), 5000);
+}
+
+function hideToast() {
+  const toast = document.getElementById('subToast');
+  if (!toast) return;
+  toast.classList.remove('show');
+  setTimeout(() => { toast.style.display = 'none'; }, 400);
+}
+
+(function(){
+  const COOKIE = 'ss_popup_seen';
+  function getCookie(n){ return document.cookie.split(';').some(c=>c.trim().startsWith(n+'=')); }
+  function setCookie(n, days){ const d=new Date(); d.setTime(d.getTime()+(days*24*60*60*1000)); document.cookie=n+'=1;expires='+d.toUTCString()+';path=/'; }
+  if(!getCookie(COOKIE)){ setTimeout(function(){ const o=document.getElementById('subOverlay'); if(o) o.classList.add('open'); }, 3000); }
+  window.closePopup = function(){ const o=document.getElementById('subOverlay'); if(o) o.classList.remove('open'); setCookie(COOKIE,30); };
+  const ov=document.getElementById('subOverlay');
+  if(ov) ov.addEventListener('click', function(e){ if(e.target===ov) closePopup(); });
+  const form=document.querySelector('.sub-popup-form');
+  if(form) form.addEventListener('submit', function(){ setCookie(COOKIE,365); });
+})();
+
+setTimeout(() => {
+  document.querySelectorAll('.flash-msg').forEach(el => {
+    el.style.transition='opacity .5s'; el.style.opacity='0';
+    setTimeout(()=>el.remove(),500);
+  });
+}, 3500);
+
+(function(){
+  const INTERVAL=3000;
+  function getSlides(sid){ const el=document.getElementById(sid); if(!el) return {slides:[],dots:[]}; return {slides:[...el.querySelectorAll('.pslide')],dots:[...el.querySelectorAll('.pdot')]}; }
+  function goTo(sid,idx){ const {slides,dots}=getSlides(sid); if(!slides.length) return; const i=((idx%slides.length)+slides.length)%slides.length; slides.forEach(s=>s.classList.remove('active')); dots.forEach(d=>d.classList.remove('active')); slides[i].classList.add('active'); if(dots[i]) dots[i].classList.add('active'); return i; }
+  document.querySelectorAll('.pdot').forEach(dot=>{ dot.addEventListener('click',function(){ const sid=this.dataset.slider,idx=parseInt(this.dataset.idx); goTo(sid,idx); const key='timer_'+sid; if(window[key]) clearInterval(window[key]); startAuto(sid,idx); }); });
+  function startAuto(sid,start){ let cur=start||0; const {slides}=getSlides(sid); if(slides.length<=1) return; const key='timer_'+sid; window[key]=setInterval(()=>{ cur=goTo(sid,cur+1); },INTERVAL); }
+  document.querySelectorAll('.pcard-slider').forEach(el=>startAuto(el.id,0));
+})();
+
+(function(){
+  const input=document.getElementById('lsInput'),drop=document.getElementById('lsDrop'),wrap=document.getElementById('lsWrap');
+  if(!input) return;
+  let timer=null;
+  input.addEventListener('input',function(){ clearTimeout(timer); const q=this.value.trim(); if(!q){closeDrop();return;} timer=setTimeout(()=>fetchResults(q),180); });
+  function fetchResults(q){ fetch('/api/search?q='+encodeURIComponent(q)).then(r=>r.json()).then(data=>renderDrop(data,q)); }
+  function renderDrop(items,q){ if(!items.length){closeDrop();return;} drop.innerHTML=items.map(p=>`<a class="ls-item" href="/search?q=${encodeURIComponent(p.name)}"><img class="ls-thumb" src="${p.image||''}" onerror="this.src='https://placehold.co/44x44/eef0ff/6c63ff?text=P'"><div class="ls-info"><div class="ls-name">${highlight(p.name,q)}</div><div class="ls-cat">${p.cat}</div></div></a>`).join(''); drop.classList.add('open'); }
+  function highlight(name,q){ const idx=name.toLowerCase().indexOf(q.toLowerCase()); if(idx===-1) return name; return name.slice(0,idx)+'<mark>'+name.slice(idx,idx+q.length)+'</mark>'+name.slice(idx+q.length); }
+  document.addEventListener('click',function(e){ if(!wrap.contains(e.target)) closeDrop(); });
+  input.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrop(); });
+  window.closeDrop=function(){ drop.innerHTML=''; drop.classList.remove('open'); };
+})();
+
+// ── SCROLL REVEAL ─────────────────────────
+(function(){
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale')
+    .forEach(el => observer.observe(el));
+})();
+</script>
+</body>
+</html>

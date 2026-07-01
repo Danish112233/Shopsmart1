@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_card.html" import product_card %}
+{% block title %}Top Deals - ShopSmart{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+  <div class="container py-5">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-7">
+        <h1 class="fw-bold display-5">Top Deals</h1>
+        <p class="text-muted mt-2 mb-4">Grab the best offers & exclusive discounts on top products handpicked for you!</p>
+        <a href="#deals" class="btn btn-primary btn-lg px-4">Shop All Deals <i class="bi bi-tags ms-1"></i></a>
+      </div>
+      <div class="col-lg-5 text-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/4290/4290854.png"
+             style="max-width:260px;opacity:.85" alt="Deals"
+             onerror="this.src='https://placehold.co/260x200/eef0ff/6c63ff?text=Top+Deals'">
+      </div>
+    </div>
+    <div class="row mt-5 g-3 text-center">
+      <div class="col-6 col-md-3">
+        <i class="bi bi-clock-history fs-2 text-primary"></i>
+        <div class="fw-semibold mt-2 mb-0">Limited Time Offers</div>
+        <small class="text-muted">Hurry! Deals won't last long</small>
+      </div>
+      <div class="col-6 col-md-3">
+        <i class="bi bi-tags fs-2 text-primary"></i>
+        <div class="fw-semibold mt-2 mb-0">Best Prices Guaranteed</div>
+        <small class="text-muted">We find the best for you</small>
+      </div>
+      <div class="col-6 col-md-3">
+        <i class="bi bi-shield-lock fs-2 text-primary"></i>
+        <div class="fw-semibold mt-2 mb-0">100% Secure</div>
+        <small class="text-muted">Safe shopping via Amazon</small>
+      </div>
+      <div class="col-6 col-md-3">
+        <i class="bi bi-gem fs-2 text-primary"></i>
+        <div class="fw-semibold mt-2 mb-0">Handpicked Deals</div>
+        <small class="text-muted">Curated just for you</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container section-gap" id="deals">
+  <h2 class="section-heading">Deals of the Day</h2>
+  <div class="row g-3">
+    {% for p in products %}
+      {{ product_card(p) }}
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+      No deals available right now. Add some from Admin panel!
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - ShopSmart</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background: #f0efff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-card { background: #fff; border-radius: 20px; box-shadow: 0 10px 40px rgba(108,99,255,.15); padding: 2.5rem; max-width: 420px; width: 100%; }
+    .brand-icon { background: #6c63ff; border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .btn-primary { background: #6c63ff; border-color: #6c63ff; }
+    .btn-primary:hover { background: #5a52e0; border-color: #5a52e0; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="brand-icon"><i class="bi bi-bag-fill text-white"></i></div>
+      <div>
+        <div class="fw-bold fs-5">ShopSmart Admin</div>
+        <div class="text-muted small">Sign in to manage products</div>
+      </div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+      <div class="alert alert-{{ 'danger' if cat=='danger' else 'success' }} py-2 small">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Username</label>
+        <input type="text" name="username" class="form-control" placeholder="admin" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Login <i class="bi bi-arrow-right ms-1"></i></button>
+    </form>
+    <div class="text-center mt-3">
+      <a href="{{ url_for('home') }}" class="small text-muted text-decoration-none">← Back to Website</a>
+    </div>
+  </div>
+</body>
+</html>

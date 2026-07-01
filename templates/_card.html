@@ -1,0 +1,49 @@
+{% macro product_card(p) %}
+{% set imgs = p['image_list'] if p['image_list'] else ['https://placehold.co/400x500/eef0ff/6c63ff?text=Product'] %}
+{% set cid = "pc" ~ p['id'] %}
+<div class="col-6 col-md-4 col-lg-3 d-flex reveal">
+  <div class="pcard w-100 d-flex flex-column">
+
+    {% if p['discount'] %}
+    <span class="disc-badge">
+      <span class="disc-num">{{ p['discount'] | replace('% OFF','') | replace('%OFF','') | replace(' OFF','') | trim }}</span>
+      <span class="disc-sym">%<br>OFF</span>
+    </span>
+    {% endif %}
+
+    <div class="pcard-slider" id="{{ cid }}">
+      {% for img in imgs %}
+      <div class="pslide {% if loop.first %}active{% endif %}">
+        <img src="{{ img }}" alt="{{ p['name'] }}"
+             onerror="this.src='https://placehold.co/400x500/eef0ff/6c63ff?text=Product'">
+      </div>
+      {% endfor %}
+      {% if imgs|length > 1 %}
+      <div class="pslide-dots">
+        {% for img in imgs %}
+        <span class="pdot {% if loop.first %}active{% endif %}"
+              data-slider="{{ cid }}" data-idx="{{ loop.index0 }}"></span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="pcard-body d-flex flex-column flex-grow-1 p-3">
+      <h6 class="pcard-title">{{ p['name'] }}</h6>
+      <div class="mb-3">
+        {% set r = p['rating']|float %}
+        {% for i in range(r|int) %}<i class="bi bi-star-fill text-warning" style="font-size:.72rem"></i>{% endfor %}
+        {% if r - r|int >= 0.5 %}<i class="bi bi-star-half text-warning" style="font-size:.72rem"></i>{% endif %}
+        <span class="text-muted ms-1" style="font-size:.72rem">({{ p['reviews'] | int }})</span>
+      </div>
+      <a href="{{ p['link'] }}" target="_blank" rel="nofollow sponsored noopener noreferrer"
+         class="amz-btn mt-auto"
+         onclick="trackClick('{{ p['id'] }}', '{{ p['name']|replace("'","\\\'") }}')">
+        <i class="bi bi-cart-fill me-2"></i>
+        Check Price on Amazon
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% from "_card.html" import product_card %}
+{% block title %}ShopSmart - Best Products, Best Deals{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="container py-5">
+    <div class="row align-items-center gy-5">
+
+      <div class="col-lg-6 reveal-left">
+        <div class="pill-tag mb-3">Trusted Picks, Great Prices</div>
+        <h1 class="hero-heading fw-bold">
+          Best Products.<br>Best Deals.<br>
+          <span class="text-primary">Recommended for You.</span>
+        </h1>
+        <p class="text-muted mt-3 mb-4">
+          We handpick the best products on Amazon and bring them to you with exclusive deals — all through our affiliate links.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="{{ url_for('top_deals') }}" class="btn btn-primary btn-lg px-4">
+            Shop Now <i class="bi bi-arrow-right-circle ms-1"></i>
+          </a>
+          <a href="{{ url_for('categories') }}" class="btn btn-outline-primary btn-lg px-4">
+            Explore Categories
+          </a>
+        </div>
+        <div class="row mt-5 g-3">
+          <div class="col-4">
+            <div class="trust-badge">
+              <i class="bi bi-shield-check"></i>
+              <span>100% Trusted Amazon Products</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="trust-badge">
+              <i class="bi bi-lock-fill"></i>
+              <span>Secure Shopping via Amazon</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="trust-badge">
+              <i class="bi bi-tags-fill"></i>
+              <span>Best Deals & Exclusive Offers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HERO PRODUCT SHOWCASE -->
+      <div class="col-lg-6 d-flex justify-content-center reveal-right">
+        <div class="hero-showcase">
+          <div class="hero-diamond d-1">✦</div>
+          <div class="hero-diamond d-2">✦</div>
+          <div class="hero-diamond d-3">✦</div>
+          <div class="hero-diamond d-4">✦</div>
+          <div class="hero-products">
+            <div class="hero-prod hero-prod-left">
+              <img src="https://m.media-amazon.com/images/I/61utDjAksTL._AC_SL1500_.jpg" alt="Smartwatch">
+            </div>
+            <div class="hero-prod hero-prod-center">
+              <img src="https://m.media-amazon.com/images/I/61HmhAnkfoL._AC_SY300_SX300_QL70_FMwebp_.jpg" alt="Headphones">
+            </div>
+            <div class="hero-prod hero-prod-right">
+              <img src="https://m.media-amazon.com/images/I/81-YRA6tQqL._AC_SY300_SX300_QL70_FMwebp_.jpg" alt="Earbuds">
+            </div>
+          </div>
+          <div class="hero-platform"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="container section-gap">
+  <h2 class="section-heading text-center reveal">Shop By Categories</h2>
+  <div class="row g-3 justify-content-center">
+    {% for cat in categories %}
+    <div class="col-6 col-md-4 col-lg-2 reveal delay-{{ loop.index if loop.index <= 5 else 5 }}">
+      <a href="{{ url_for('categories', cat_key=cat.key) }}" class="text-decoration-none">
+        <div class="cat-card text-center p-3">
+          <i class="bi {{ cat.icon }} cat-icon"></i>
+          <div class="fw-semibold mt-2 mb-1" style="font-size:.9rem">{{ cat.name }}</div>
+          <span class="cat-explore">Explore <i class="bi bi-arrow-right"></i></span>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- TOP PICKS -->
+<section class="container section-gap">
+  <h2 class="section-heading text-center reveal">Top Picks For You</h2>
+  <div class="row g-3">
+    {% for p in products %}
+      {{ product_card(p) }}
+    {% else %}
+    <p class="text-center text-muted py-4">No products yet. Add from Admin panel.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- WHY SHOP -->
+<section class="container section-gap">
+  <div class="why-box row align-items-center g-4 p-4 p-md-5 reveal">
+    <div class="col-lg-5 text-center reveal-left">
+      <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png"
+           style="max-width:220px;opacity:.85" alt="Amazon cart"
+           onerror="this.src='https://placehold.co/220x180/eef0ff/6c63ff?text=Amazon'">
+    </div>
+    <div class="col-lg-7 reveal-right">
+      <div class="pill-tag mb-2">Why Shop Through Us?</div>
+      <h3 class="fw-bold">You Shop, Amazon Delivers.<br>You Save, We Earn.</h3>
+      <ul class="list-unstyled mt-3 why-list">
+        <li><i class="bi bi-check-circle-fill text-primary me-2"></i>All products are from Amazon</li>
+        <li><i class="bi bi-check-circle-fill text-primary me-2"></i>You get the best prices & offers</li>
+        <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Safe & secure shopping experience</li>
+        <li><i class="bi bi-check-circle-fill text-primary me-2"></i>We earn a small commission – at no extra cost to you!</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
